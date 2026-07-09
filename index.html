@@ -702,7 +702,7 @@
             <div class="md:col-span-4 reveal">
                 <h2 class="h-section mb-6">Let's Work<br>Together.</h2>
                 <p id="copy-ai-12" class="text-gray-600 mb-8">성장을 멈추지 않는 마케터,<br>박남준의 전체 이력서를 확인하세요.</p>
-                <button onclick="toggleDetail('resumeDetail', 'View Full Resume', 'Close Resume')" class="btn-editorial w-full justify-center" id="overlay-resumeDetail">
+                <button onclick="openResumeModal()" class="btn-editorial w-full justify-center" id="overlay-resumeDetail">
                     <span class="toggle-text">View Full Resume</span>
                 </button>
             </div>
@@ -719,15 +719,6 @@
                         <p class="text-gray-600 text-sm leading-relaxed">
                             온드미디어 채널 셋업 및 검색 노출 최적화를 통한 오가닉 리드 확보. CRM 자동화 도구 기획 및 뉴스레터 발행을 통한 고객 리텐션 지표 개선.
                         </p>
-                    </div>
-                </div>
-
-                <!-- Hidden Full Resume Box -->
-                <div id="resumeDetail" class="max-h-0 overflow-hidden expandable-content bg-gray-50">
-                    <div class="p-8 border border-gray-200 mt-4 text-sm text-gray-700 leading-relaxed">
-                        <h4 class="font-bold text-lg text-gray-900 mb-4">세부 이력 및 자기소개서</h4>
-                        <img src="https://postfiles.pstatic.net/MjAyNjAzMDhfMjI4/MDAxNzcyOTA3MDc4Mzc1.jz56QvpzggaQvuT5-tDrd-5JDFaav2aA-H21DcnwSyAg.1uJRENvXYaFSw4Ka0vX0mt4yVlsA1DRtVyKJpkQja1wg.JPEG/resume.jpg?type=w966" alt="Resume Document" class="w-full h-auto border border-gray-200 mix-blend-multiply" onerror="this.style.display='none';">
-                        <p class="mt-4 text-center text-gray-500">※ 상기 이미지는 이력서 미리보기입니다.</p>
                     </div>
                 </div>
             </div>
@@ -783,6 +774,21 @@
     <div id="cardNewsModal" class="fixed inset-0 z-[2500] hidden bg-white/95 backdrop-blur-sm flex-col items-center justify-center p-4 sm:p-8 opacity-0 transition-opacity duration-300">
         <button class="absolute top-6 right-6 text-gray-900 text-4xl z-50 hover:text-orange-600 transition-colors" onclick="closeCardNewsModal()">&times;</button>
         <div class="w-full max-w-[608px] aspect-square bg-black shadow-2xl transform scale-95 transition-transform duration-300" id="cardNewsModalFrame"></div>
+    </div>
+
+    <!-- Resume PDF Modal -->
+    <div id="resumeModal" class="fixed inset-0 z-[2600] hidden bg-white/95 backdrop-blur-sm flex-col items-center justify-center p-4 sm:p-8 opacity-0 transition-opacity duration-300">
+        <button class="absolute top-6 right-6 text-gray-900 text-4xl z-50 hover:text-orange-600 transition-colors" onclick="closeResumeModal()">&times;</button>
+        <div class="w-full max-w-[760px] relative px-12 h-[78vh] flex items-center">
+            <button onclick="changeResumePage(-1)" aria-label="Previous resume page" class="absolute left-0 top-1/2 -translate-y-1/2 text-white text-lg z-50 w-10 h-10 rounded-full flex items-center justify-center transition-all bg-black/30 hover:bg-black/45 backdrop-blur-md shadow-xl border border-white/40">
+                <i class="fa-solid fa-chevron-left"></i>
+            </button>
+            <div id="resumePageContainer" class="w-full h-full flex items-center justify-center transition-opacity duration-200">
+            </div>
+            <button onclick="changeResumePage(1)" aria-label="Next resume page" class="absolute right-0 top-1/2 -translate-y-1/2 text-white text-lg z-50 w-10 h-10 rounded-full flex items-center justify-center transition-all bg-black/30 hover:bg-black/45 backdrop-blur-md shadow-xl border border-white/40">
+                <i class="fa-solid fa-chevron-right"></i>
+            </button>
+        </div>
     </div>
 
     <script>
@@ -1001,6 +1007,70 @@
                 if (currentAppSlide < 0) currentAppSlide = appSlides.length - 1;
                 if (currentAppSlide >= appSlides.length) currentAppSlide = 0;
                 renderAppSlide();
+                container.style.opacity = '1';
+            }, 120);
+        }
+
+        const resumePages = [
+            'assets/resume/resume-page-01.jpg',
+            'assets/resume/resume-page-02.jpg',
+            'assets/resume/resume-page-03.jpg',
+            'assets/resume/resume-page-04.jpg'
+        ];
+        let currentResumePage = 0;
+        const preloadedResumePages = new Set();
+
+        function preloadResumePage(index) {
+            const normalized = (index + resumePages.length) % resumePages.length;
+            if (preloadedResumePages.has(normalized)) return;
+            const img = new Image();
+            img.src = resumePages[normalized];
+            preloadedResumePages.add(normalized);
+        }
+
+        function renderResumePage() {
+            const container = document.getElementById('resumePageContainer');
+            if (!container) return;
+            container.innerHTML = '';
+
+            const img = document.createElement('img');
+            img.src = resumePages[currentResumePage];
+            img.alt = `Resume page ${currentResumePage + 1}`;
+            img.className = 'max-w-full max-h-full object-contain shadow-2xl border border-gray-200 bg-white';
+            container.appendChild(img);
+
+            preloadResumePage(currentResumePage + 1);
+            preloadResumePage(currentResumePage - 1);
+        }
+
+        function openResumeModal() {
+            currentResumePage = 0;
+            renderResumePage();
+            preloadResumePage(0);
+            preloadResumePage(1);
+            const modal = document.getElementById('resumeModal');
+            modal.classList.remove('hidden');
+            modal.style.display = 'flex';
+            setTimeout(() => { modal.classList.add('opacity-100'); }, 10);
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeResumeModal() {
+            const modal = document.getElementById('resumeModal');
+            modal.classList.remove('opacity-100');
+            setTimeout(() => { modal.classList.add('hidden'); modal.style.display = ''; }, 300);
+            document.body.style.overflow = '';
+        }
+
+        function changeResumePage(direction) {
+            const container = document.getElementById('resumePageContainer');
+            if (!container) return;
+            container.style.opacity = '0';
+            setTimeout(() => {
+                currentResumePage += direction;
+                if (currentResumePage < 0) currentResumePage = resumePages.length - 1;
+                if (currentResumePage >= resumePages.length) currentResumePage = 0;
+                renderResumePage();
                 container.style.opacity = '1';
             }, 120);
         }
