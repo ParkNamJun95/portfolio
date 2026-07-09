@@ -715,7 +715,7 @@
                             <h4 class="text-xl font-bold text-gray-900">팀테헤란 / 팀히든</h4>
                             <span class="text-sm font-medium text-gray-500">2023 - 2025</span>
                         </div>
-                        <p class="text-orange-600 font-bold text-sm mb-3">마케팅 & CRM 파트장 / 총괄</p>
+                        <p class="text-orange-600 font-bold text-sm mb-3">마케팅 & CRM 파트장</p>
                         <ul class="text-gray-600 text-sm leading-relaxed grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-2">
                             <li>• 온드미디어 마케팅</li>
                             <li>• 콘텐츠 제작</li>
@@ -798,6 +798,10 @@
                 <i class="fa-solid fa-chevron-left"></i>
             </button>
             <div id="resumePageContainer" class="w-full h-full flex items-center justify-center transition-opacity duration-200">
+                <img src="assets/resume/resume-page-01.jpg" alt="Resume page 1" class="resume-page-img max-w-full max-h-full object-contain shadow-2xl border border-gray-200 bg-white">
+                <img src="assets/resume/resume-page-02.jpg" alt="Resume page 2" class="resume-page-img hidden max-w-full max-h-full object-contain shadow-2xl border border-gray-200 bg-white">
+                <img src="assets/resume/resume-page-03.jpg" alt="Resume page 3" class="resume-page-img hidden max-w-full max-h-full object-contain shadow-2xl border border-gray-200 bg-white">
+                <img src="assets/resume/resume-page-04.jpg" alt="Resume page 4" class="resume-page-img hidden max-w-full max-h-full object-contain shadow-2xl border border-gray-200 bg-white">
             </div>
             <button onclick="changeResumePage(1)" aria-label="Next resume page" class="absolute right-0 top-1/2 -translate-y-1/2 text-white text-lg z-50 w-10 h-10 rounded-full flex items-center justify-center transition-all bg-black/30 hover:bg-black/45 backdrop-blur-md shadow-xl border border-white/40">
                 <i class="fa-solid fa-chevron-right"></i>
@@ -1025,43 +1029,18 @@
             }, 120);
         }
 
-        const resumePages = [
-            'assets/resume/resume-page-01.jpg',
-            'assets/resume/resume-page-02.jpg',
-            'assets/resume/resume-page-03.jpg',
-            'assets/resume/resume-page-04.jpg'
-        ];
         let currentResumePage = 0;
-        const preloadedResumePages = new Set();
-
-        function preloadResumePage(index) {
-            const normalized = (index + resumePages.length) % resumePages.length;
-            if (preloadedResumePages.has(normalized)) return;
-            const img = new Image();
-            img.src = resumePages[normalized];
-            preloadedResumePages.add(normalized);
-        }
 
         function renderResumePage() {
-            const container = document.getElementById('resumePageContainer');
-            if (!container) return;
-            container.innerHTML = '';
-
-            const img = document.createElement('img');
-            img.src = resumePages[currentResumePage];
-            img.alt = `Resume page ${currentResumePage + 1}`;
-            img.className = 'max-w-full max-h-full object-contain shadow-2xl border border-gray-200 bg-white';
-            container.appendChild(img);
-
-            preloadResumePage(currentResumePage + 1);
-            preloadResumePage(currentResumePage - 1);
+            const pages = document.querySelectorAll('.resume-page-img');
+            pages.forEach((page, index) => {
+                page.classList.toggle('hidden', index !== currentResumePage);
+            });
         }
 
         function openResumeModal() {
             currentResumePage = 0;
             renderResumePage();
-            preloadResumePage(0);
-            preloadResumePage(1);
             const modal = document.getElementById('resumeModal');
             modal.classList.remove('hidden');
             modal.style.display = 'flex';
@@ -1081,9 +1060,10 @@
             if (!container) return;
             container.style.opacity = '0';
             setTimeout(() => {
+                const pages = document.querySelectorAll('.resume-page-img');
                 currentResumePage += direction;
-                if (currentResumePage < 0) currentResumePage = resumePages.length - 1;
-                if (currentResumePage >= resumePages.length) currentResumePage = 0;
+                if (currentResumePage < 0) currentResumePage = pages.length - 1;
+                if (currentResumePage >= pages.length) currentResumePage = 0;
                 renderResumePage();
                 container.style.opacity = '1';
             }, 120);
